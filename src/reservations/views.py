@@ -9,14 +9,35 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from reservations.models import Reservation
-from reservations.serializers import (CreateReservationSerializer,
+from reservations.models import Reservation, ReservationStatus
+from reservations.serializers import (ConfirmedReservationDetailSerializer,
+                                      ConfirmedReservationListSerializer,
+                                      CreateReservationSerializer,
                                       ReservationSerializer)
 from reservations.services import cancel_reservation, create_reservation
 from showings.models import Showing
 
 
 @extend_schema_view(
+    list=extend_schema(
+        summary="List confirmed reservations (history).",
+        description="Returns authenticated user's CONFIRMED reservations ordered by created_at (newest first).",
+        tags=["Reservations"],
+        responses={status.HTTP_200_OK: ConfirmedReservationListSerializer(many=True)},
+    ),
+    retrieve=extend_schema(
+        summary="Retrieve confirmed reservation with tickets.",
+        description="Returns a single CONFIRMED reservation owned by the user, including tickets.",
+        tags=["Reservations"],
+        responses={
+            status.HTTP_200_OK: ConfirmedReservationDetailSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Not found (not owned by user or not CONFIRMED).",
+                response=OpenApiTypes.OBJECT,
+                examples=[OpenApiExample("Not found", value={"detail": "Not found."})],
+            ),
+        },
+    ),
     create=extend_schema(
         summary="Create reservation (booking) for a showing.",
         description=(
@@ -146,16 +167,39 @@ from showings.models import Showing
         },
     ),
 )
-class ReservationViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, GenericViewSet):
+class ReservationViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet,
+):
     permission_classes = [permissions.IsAuthenticated]
     lookup_url_kwarg = "booking_id"
 
     def get_queryset(self) -> QuerySet[Reservation]:
-        return Reservation.objects.filter(user=self.request.user)
+        qs: QuerySet[Reservation] = Reservation.objects.filter(user=self.request.user).select_related(
+            "showing",
+            "showing__theater_hall",
+            "showing__variant",
+            "showing__variant__movie",
+        )
+
+        if self.action in ("list", "retrieve"):
+            qs: QuerySet[Reservation] = qs.filter(status=ReservationStatus.CONFIRMED).order_by("-created_at")
+
+        if self.action == "retrieve":
+            qs: QuerySet[Reservation] = qs.prefetch_related("tickets__seat")
+
+        return qs
     
     def get_serializer_class(self) -> type[serializers.Serializer]:
         if self.action == "create":
             return CreateReservationSerializer
+        if self.action == "list":
+            return ConfirmedReservationListSerializer
+        if self.action == "retrieve":
+            return ConfirmedReservationDetailSerializer
         return super().get_serializer_class()
 
     def create(self, request: Request, *args, **kwargs) -> Response:
