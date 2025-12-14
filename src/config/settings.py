@@ -38,6 +38,7 @@ APPLICATIONS = [
     'movies',
     'theaters',
     'showings',
+    'reservations',
 ]
 
 THIRD_PARTY_APPS = [

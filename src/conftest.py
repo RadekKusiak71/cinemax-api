@@ -3,11 +3,13 @@ import pytest
 from moto import mock_aws
 from pytest_factoryboy import register
 
-from users.factories import UserFactory
 from core.factories import LanguageFactory
-from movies.factories import MovieFactory, DirectorFactory, GenreFactory
-from theaters.factories import TheaterHallFactory, SeatFactory
-from showings.factories import ShowingFactory, ShowingFormatFactory, ShowingVariantFactory
+from movies.factories import DirectorFactory, GenreFactory, MovieFactory
+from reservations.factories import ReservationFactory, TicketFactory
+from showings.factories import (ShowingFactory, ShowingFormatFactory,
+                                ShowingVariantFactory)
+from theaters.factories import SeatFactory, TheaterHallFactory
+from users.factories import UserFactory
 
 register(ShowingFactory)
 register(ShowingFormatFactory)
@@ -19,6 +21,8 @@ register(DirectorFactory)
 register(GenreFactory)
 register(TheaterHallFactory)
 register(SeatFactory)
+register(ReservationFactory)
+register(TicketFactory)
 
 @pytest.fixture(autouse=True)
 def mock_aws_s3(settings):
