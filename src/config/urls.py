@@ -14,4 +14,6 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('api/', include(docs_urlpatterns)),
     path('api/', include('users.urls', namespace='users')),
+    path('api/', include('movies.urls', namespace='movies')),
+    path('api/', include('theaters.urls', namespace='theaters')),
 ]

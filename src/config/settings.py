@@ -36,6 +36,7 @@ APPLICATIONS = [
     'users',
     'core',
     'movies',
+    'theaters',
 ]
 
 THIRD_PARTY_APPS = [

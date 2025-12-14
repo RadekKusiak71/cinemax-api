@@ -6,12 +6,15 @@ from pytest_factoryboy import register
 from users.factories import UserFactory
 from core.factories import LanguageFactory
 from movies.factories import MovieFactory, DirectorFactory, GenreFactory
+from theaters.factories import TheaterHallFactory, SeatFactory
 
 register(UserFactory)
 register(LanguageFactory)
 register(MovieFactory)
 register(DirectorFactory)
 register(GenreFactory)
+register(TheaterHallFactory)
+register(SeatFactory)
 
 @pytest.fixture(autouse=True)
 def mock_aws_s3(settings):
