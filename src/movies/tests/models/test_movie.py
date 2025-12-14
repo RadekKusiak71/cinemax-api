@@ -41,3 +41,19 @@ def test_movie_is_protected_due_to_director_deletion(movie: Movie, director) -> 
 def test_movie_is_protected_due_to_original_language_deletion(movie: Movie, language) -> None:
     with pytest.raises(ProtectedError):
         language.delete()
+
+def test_movie_duration_min_value_validation(movie: Movie) -> None:
+    movie.duration = 0
+    with pytest.raises(ValidationError) as exc_info:
+        movie.full_clean()
+    
+    assert 'duration' in exc_info.value.message_dict
+    assert exc_info.value.message_dict['duration'] == ['Duration must be at least 1 minute.']
+
+def test_movie_duration_max_value_validation(movie: Movie) -> None:
+    movie.duration = 501
+    with pytest.raises(ValidationError) as exc_info:
+        movie.full_clean()
+    
+    assert 'duration' in exc_info.value.message_dict
+    assert exc_info.value.message_dict['duration'] == ['Duration cannot exceed 500 minutes.']

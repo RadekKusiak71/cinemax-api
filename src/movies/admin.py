@@ -17,7 +17,7 @@ class DirectorAdmin(admin.ModelAdmin):
     
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ('title', 'release_year', 'director','original_language', 'age_restriction')
+    list_display = ('title', 'release_year', 'director','original_language', 'age_restriction', 'duration')
     list_select_related = ('director', 'original_language')
     search_fields = ('title', 'director__first_name', 'director__last_name', 'original_language__name')
     list_filter = ('release_year', 'age_restriction', 'genres', 'original_language', 'director')

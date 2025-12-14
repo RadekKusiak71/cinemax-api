@@ -29,6 +29,7 @@ class MovieFactory(factory.django.DjangoModelFactory):
     age_restriction = factory.Faker("random_int", min=0, max=21)
     original_language = factory.SubFactory(LanguageFactory)
     director = factory.SubFactory(DirectorFactory)
+    duration = 120
 
     @factory.post_generation
     def genres(self, create: bool, extracted: list[Genre] | None, **kwargs) -> None:

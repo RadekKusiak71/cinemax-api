@@ -7,7 +7,11 @@ from users.factories import UserFactory
 from core.factories import LanguageFactory
 from movies.factories import MovieFactory, DirectorFactory, GenreFactory
 from theaters.factories import TheaterHallFactory, SeatFactory
+from showings.factories import ShowingFactory, ShowingFormatFactory, ShowingVariantFactory
 
+register(ShowingFactory)
+register(ShowingFormatFactory)
+register(ShowingVariantFactory)
 register(UserFactory)
 register(LanguageFactory)
 register(MovieFactory)

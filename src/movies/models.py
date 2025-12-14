@@ -29,6 +29,13 @@ class Movie(models.Model):
     summary = models.TextField(max_length=1500)
     release_year = models.PositiveIntegerField(validators=[MinValueValidator(1800)])
     poster_image = models.ImageField(upload_to=poster_image_upload_path)
+    duration = models.PositiveIntegerField(
+        validators=[
+            MinValueValidator(1, message='Duration must be at least 1 minute.'),
+            MaxValueValidator(500, message='Duration cannot exceed 500 minutes.')
+        ],
+        help_text='Duration of movie in minutes'
+    )
     age_restriction = models.PositiveIntegerField(
         default=0, 
         validators=[MaxValueValidator(21)],
