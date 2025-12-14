@@ -39,6 +39,7 @@ APPLICATIONS = [
     'theaters',
     'showings',
     'reservations',
+    'payments',
 ]
 
 THIRD_PARTY_APPS = [
@@ -172,6 +173,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 # Redis
 REDIS_HOST = config('REDIS_HOST', cast=str)
 REDIS_PORT = config('REDIS_PORT', cast=int)
@@ -192,3 +195,8 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 360
 CELERY_TIMEZONE = 'UTC'
 CELERY_ENABLE_UTC = True
+
+# STRIPE
+STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY', cast=str)
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', cast=str)
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', cast=str)
