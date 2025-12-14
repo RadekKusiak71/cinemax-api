@@ -2,6 +2,7 @@ import boto3
 import pytest
 from moto import mock_aws
 from pytest_factoryboy import register
+from rest_framework.test import APIClient
 
 from core.factories import LanguageFactory
 from movies.factories import DirectorFactory, GenreFactory, MovieFactory
@@ -23,6 +24,10 @@ register(TheaterHallFactory)
 register(SeatFactory)
 register(ReservationFactory)
 register(TicketFactory)
+
+@pytest.fixture
+def api_client() -> APIClient:
+    return APIClient()
 
 @pytest.fixture(autouse=True)
 def mock_aws_s3(settings):

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 from decouple import Csv, config
@@ -44,9 +45,12 @@ APPLICATIONS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
     'drf_spectacular_sidecar',
     'django_celery_beat',
+    
 ]
 
 INSTALLED_APPS = [
@@ -72,7 +76,20 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=config('DJANGO_JWT_ACCESS_TOKEN_TTL', cast=int)),
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=config('DJANGO_JWT_REFRESH_TOKEN_TTL', cast=int)),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "SIGNING_KEY": config('DJANGO_JWT_SIGNING_KEY'),
 }
 
 SPECTACULAR_SETTINGS = {
