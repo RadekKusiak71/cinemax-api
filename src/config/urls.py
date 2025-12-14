@@ -18,4 +18,5 @@ urlpatterns = [
     path('api/', include('theaters.urls', namespace='theaters')),
     path('api/', include('showings.urls', namespace='showings')),
     path('api/', include('reservations.urls', namespace='reservations')),
+    path('api/', include('payments.urls', namespace='payments')),
 ]
