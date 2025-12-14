@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from django.db.models import QuerySet
+from django.db.models import Exists, OuterRef, QuerySet
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (OpenApiExample, OpenApiParameter,
@@ -12,9 +12,61 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from movies.models import Movie
+from reservations.models import Reservation, ReservationStatus, Ticket
 from showings.models import Showing
-from showings.serializers import GroupedShowingSerializer
+from showings.serializers import (GroupedShowingSerializer,
+                                  ShowingRoomLayoutSerializer)
+from theaters.models import Seat
 
+
+@extend_schema(
+    summary='List all seats for a showing.',
+    description='Lists all seats for a showing specified by `showing_id` with flag that determines if seat is reserved.',
+    tags=['Showings'],
+    responses={
+        status.HTTP_200_OK: ShowingRoomLayoutSerializer(many=True),
+        status.HTTP_404_NOT_FOUND: OpenApiResponse(
+            description='Showing not found.',
+            response=OpenApiTypes.OBJECT,
+            examples=[
+                OpenApiExample(
+                    'Showing Not Found',
+                    summary='Showing Not Found',
+                    description='The specified showing does not exist.',
+                    value={
+                        'detail': 'Not found.'
+                    },
+                    status_codes=[status.HTTP_404_NOT_FOUND],
+                )
+            ]
+        )
+    }
+)
+class RetrieveShowingRoomLayoutAPIView(ListAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = ShowingRoomLayoutSerializer
+
+    def get_queryset(self, showing: Showing) -> QuerySet[Showing]:
+        return Seat.objects.filter(
+            theater_hall__showings=showing,
+        ).annotate(
+            is_reserved=Exists(
+                Ticket.objects.filter(
+                    reservation__status__in=[ReservationStatus.CONFIRMED, ReservationStatus.PENDING],
+                    reservation__showing=showing,
+                    seat_id=OuterRef('pk')
+                )
+            )
+        ).order_by('row', 'number')
+
+    def list(self, request: Request, *args, **kwargs) -> Response:
+        queryset: QuerySet[Seat] = self.get_queryset(
+            showing=get_object_or_404(Showing, pk=self.kwargs.get('showing_id'))
+        )
+        serializer: ShowingRoomLayoutSerializer = ShowingRoomLayoutSerializer(
+            queryset, many=True
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 @extend_schema(
     summary='List availalbe showings for a movie in specified theater.',

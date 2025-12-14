@@ -1,6 +1,15 @@
 from rest_framework import serializers
 
 from showings.models import Showing
+from theaters.models import Seat
+
+
+class ShowingRoomLayoutSerializer(serializers.ModelSerializer):
+    is_reserved = serializers.BooleanField(help_text='Indicates if the seat is reserved for the showing.')
+    
+    class Meta:
+        model = Seat
+        fields = ['id', 'row', 'number', 'is_reserved']
 
 
 class ShowingSerializer(serializers.ModelSerializer):
