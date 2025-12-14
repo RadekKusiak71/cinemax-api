@@ -4,7 +4,7 @@ from django.db import models
 from showings.models import Showing
 from theaters.models import Seat
 from users.models import User
-
+from datetime import timedelta
 
 class ReservationStatus(models.TextChoices):
     PENDING = 'PENDING', 'Pending'
@@ -13,6 +13,7 @@ class ReservationStatus(models.TextChoices):
     CANCELLED = 'CANCELLED', 'Cancelled'
 
 class Reservation(models.Model):
+    EXPIRATION_DELTA = timedelta(minutes=15)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservations')
     showing = models.ForeignKey(Showing, on_delete=models.PROTECT, related_name='reservations')

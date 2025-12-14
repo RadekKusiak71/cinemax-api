@@ -29,8 +29,65 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
       - ".env"
 
+  redis:
+    image: redis:7-alpine
+    container_name: cinemax_redis
+    restart: always
+    command: redis-server --appendonly yes --requirepass cinemax
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redis_data:/data"
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a cinemax ping | grep PONG" ]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
+  celery_worker:
+    container_name: cinemax_celery_worker
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["worker.entrypoint.sh"]
+    volumes:
+      - "./src:/app"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    env_file:
+      - ".env"
+
+  celery_beat:
+    container_name: cinemax_celery_beat
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["beat.entrypoint.sh"]
+    volumes:
+      - "./src:/app"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    env_file:
+      - ".env"
+
+
 volumes:
   postgres_data:
+  redis_data:
