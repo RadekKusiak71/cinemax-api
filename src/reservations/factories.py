@@ -20,3 +20,4 @@ class TicketFactory(factory.django.DjangoModelFactory):
         'theaters.factories.SeatFactory', 
         theater_hall=factory.SelfAttribute('..reservation.showing.theater_hall')
     )
+    price = 10.00

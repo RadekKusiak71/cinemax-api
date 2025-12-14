@@ -34,6 +34,12 @@ class Ticket(models.Model):
 
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='tickets')
     seat = models.ForeignKey(Seat, on_delete=models.PROTECT, related_name='tickets')
-
+    price = models.DecimalField(
+        max_digits=6, 
+        decimal_places=2,
+        validators=[MinValueValidator(0.0)],
+        help_text="Price for the ticket in EUR."
+    )
+    
     def __str__(self) -> str:
         return f"Ticket {self.id} for Reservation {self.reservation.id} - Seat {self.seat.row}-{self.seat.number}"
