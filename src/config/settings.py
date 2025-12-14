@@ -32,8 +32,10 @@ ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', cast=Csv())
 
 # Application definition
 
-APPLICATIONTS = [
+APPLICATIONS = [
     'users',
+    'core',
+    'movies',
 ]
 
 THIRD_PARTY_APPS = [
@@ -50,7 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     *THIRD_PARTY_APPS,
-    *APPLICATIONTS,
+    *APPLICATIONS,
 ]
 
 MIDDLEWARE = [

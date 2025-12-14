@@ -11,6 +11,7 @@ dependencies = [
     "drf-spectacular[sidecar]>=0.29.0",
     "gunicorn>=23.0.0",
     "moto[s3]>=5.1.18",
+    "pillow>=12.0.0",
     "psycopg>=3.3.2",
     "psycopg-binary>=3.3.2",
     "python-decouple>=3.8",
