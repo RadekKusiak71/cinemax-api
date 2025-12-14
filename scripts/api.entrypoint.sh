@@ -5,8 +5,8 @@ set -e
 DJANGO_DEBUG=${DJANGO_DEBUG:-"False"}
 
 python manage.py collectstatic --noinput
-
 python manage.py migrate --noinput
+python manage.py create_admin_account
 
 if [ "$DJANGO_DEBUG" = "True" ]; then
     echo "Running in DEBUG mode"

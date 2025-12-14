@@ -32,7 +32,7 @@ ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', cast=Csv())
 # Application definition
 
 APPLICATIONTS = [
-
+    'users',
 ]
 
 THIRD_PARTY_APPS = [
@@ -76,6 +76,8 @@ SPECTACULAR_SETTINGS = {
     'REDOC_DIST': 'SIDECAR',
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
 }
+
+AUTH_USER_MODEL = 'users.User'
 
 ROOT_URLCONF = 'config.urls'
 
