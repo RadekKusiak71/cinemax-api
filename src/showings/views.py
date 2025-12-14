@@ -1,22 +1,71 @@
 from collections import defaultdict
+from datetime import timedelta
 
-from django.db.models import Exists, OuterRef, QuerySet
+from django.db.models import (DateTimeField, DurationField, Exists,
+                              ExpressionWrapper, F, OuterRef, QuerySet)
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (OpenApiExample, OpenApiParameter,
                                    OpenApiResponse, extend_schema)
 from rest_framework import permissions, status
-from rest_framework.generics import ListAPIView, get_object_or_404
+from rest_framework.generics import (ListAPIView, RetrieveAPIView,
+                                     get_object_or_404)
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from movies.models import Movie
-from reservations.models import Reservation, ReservationStatus, Ticket
+from reservations.models import ReservationStatus, Ticket
 from showings.models import Showing
 from showings.serializers import (GroupedShowingSerializer,
+                                  ShowingDetailsSerializer,
                                   ShowingRoomLayoutSerializer)
 from theaters.models import Seat
+
+
+@extend_schema(
+    summary='Retrieve detailed information about a specific showing.',
+    description='Endpoint to retrieve detailed information about a specific showing by its ID.',
+    tags=['Showings'],
+    responses={
+        status.HTTP_200_OK: ShowingDetailsSerializer,
+        status.HTTP_404_NOT_FOUND: OpenApiResponse(
+            response=OpenApiTypes.OBJECT,
+            description='Showing not found.',
+            examples=[
+                OpenApiExample(
+                    name='Showing Not Found',
+                    value={'detail': 'Not found.'},
+                    response_only=True,
+                    status_codes=[status.HTTP_404_NOT_FOUND],
+                )
+            ],
+        )
+    }
+)
+class RetrieveShowingAPIView(RetrieveAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = ShowingDetailsSerializer
+    queryset = (
+        Showing.objects.all()
+        .select_related(
+            'variant', 
+            'variant__movie',
+            'theater_hall',
+        )
+        .annotate(
+            movie_duration=ExpressionWrapper(
+                (F('variant__movie__duration') + Showing.CLEANUP_BUFFER_MINUTES) * timedelta(minutes=1),
+                output_field=DurationField()
+            )
+        )
+        .annotate(
+            end_time=ExpressionWrapper(
+                F("start_time") + F('movie_duration'),
+                output_field=DateTimeField(),
+            )
+        )
+    )
 
 
 @extend_schema(
@@ -72,7 +121,7 @@ class RetrieveShowingRoomLayoutAPIView(ListAPIView):
     summary='List availalbe showings for a movie in specified theater.',
     description='Lists availalbe showings `start_times` with `variant_key` ' \
     'representing movie type (e.g 2D English Subtitles) for a movie in specified theater.',
-    tags=['Screenings'],
+    tags=['Showings'],
     parameters=[
         OpenApiParameter(
             name='date',
