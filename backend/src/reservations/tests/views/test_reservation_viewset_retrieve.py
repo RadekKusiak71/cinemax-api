@@ -15,23 +15,6 @@ def test_retrieve_requires_auth(api_client, reservation_factory):
     res = api_client.get(_detail_url(r.id))
     assert res.status_code == 401
 
-
-def test_retrieve_returns_404_for_pending_reservation(
-    api_client,
-    user_factory,
-    reservation_factory,
-):
-    user = user_factory()
-    api_client.force_authenticate(user=user)
-
-    r = reservation_factory(user=user, status=ReservationStatus.PENDING)
-
-    res = api_client.get(_detail_url(r.id))
-
-    assert res.status_code == 404
-    assert res.json()["detail"] == "No Reservation matches the given query."
-
-
 def test_retrieve_returns_404_for_other_users_reservation(
     api_client,
     user_factory,

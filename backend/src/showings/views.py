@@ -94,6 +94,7 @@ class RetrieveShowingAPIView(RetrieveAPIView):
 class RetrieveShowingRoomLayoutAPIView(ListAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = ShowingRoomLayoutSerializer
+    pagination_class = None
 
     def get_queryset(self, showing: Showing) -> QuerySet[Showing]:
         return Seat.objects.filter(
@@ -153,7 +154,7 @@ class RetrieveShowingRoomLayoutAPIView(ListAPIView):
 class ListMovieShowingsAPIView(ListAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = GroupedShowingSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = None
     
     def get_queryset(self, movie: Movie) -> QuerySet[Showing]:
         return Showing.objects.filter(

@@ -1,10 +1,11 @@
 import logging
+from urllib.parse import urlencode
 
 import stripe
-from stripe.checkout import Session
-
+from django.conf import settings
 from payments.exceptions import InvalidBookingStatusError
 from reservations.models import Reservation, ReservationStatus
+from stripe.checkout import Session
 
 logger = logging.getLogger(__name__)
 
@@ -16,19 +17,29 @@ def create_checkout(reservation: Reservation) -> Session:
 
     unit_amount: int = int(round(float(reservation.full_price) * 100))
 
+    success_base = settings.STRIPE_SUCCESS_URL_BASE
+    cancel_base = settings.STRIPE_CANCEL_URL_BASE
+
+    success_qs = urlencode(
+        {
+            "status": "success",
+            "session_id": "{CHECKOUT_SESSION_ID}",
+            "reservation_id": reservation.id,
+        },
+        safe="{}",
+    )
+    
+    cancel_qs = urlencode(
+        {
+            "status": "cancel",
+            "reservation_id": reservation.id,
+        }
+    )
+
     try:
         session: Session = stripe.checkout.Session.create(
-            success_url=(
-                f"cinemax://payment-return"
-                f"?status=success"
-                f"&session_id={{CHECKOUT_SESSION_ID}}"
-                f"&reservation_id={reservation.id}"
-            ),
-            cancel_url=(
-                f"cinemax://payment-return"
-                f"?status=cancel"
-                f"&reservation_id={reservation.id}"
-            ),
+            success_url=f"{success_base}?{success_qs}",
+            cancel_url=f"{cancel_base}?{cancel_qs}",
             payment_method_types=["card"],
             mode="payment",
             line_items=[

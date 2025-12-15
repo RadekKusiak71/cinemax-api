@@ -80,14 +80,14 @@ def cancel_reservation(reservation: Reservation) -> None:
 
 
 def _assert_user_has_no_pending_reservation(*, user: User, showing: Showing) -> None:
-    exists: bool = Reservation.objects.filter(
+    if Reservation.objects.filter(
         user=user,
         showing=showing,
         status=ReservationStatus.PENDING,
-    ).exists()
-    if exists:
+    ).count() >= 3:
         raise exc.ExistingPendingReservationException(
-            "User already has a pending reservation for this showing."
+            "User already has three pending reservations for this showing. " \
+            "Please wait 15 minutes before making a new reservation."
         )
 
 

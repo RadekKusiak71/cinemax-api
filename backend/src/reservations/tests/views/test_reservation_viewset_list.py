@@ -22,7 +22,7 @@ def test_list_requires_auth(api_client):
 
 
 
-def test_list_returns_only_confirmed_ordered_by_created_at_desc(
+def test_list_returns_only_confirmed_and_pending_ordered_by_created_at_desc(
     api_client,
     user_factory,
     reservation_factory,
@@ -51,8 +51,7 @@ def test_list_returns_only_confirmed_ordered_by_created_at_desc(
     assert isinstance(items, list)
 
     returned_ids = [item["id"] for item in items]
-    assert returned_ids == [r_new.id, r_old.id]
-
+    assert returned_ids == [r_new.id, r_mid.id, r_old.id]
     first = items[0]
     assert "movie_id" in first
     assert "movie_title" in first

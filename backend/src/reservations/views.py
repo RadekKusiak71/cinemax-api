@@ -3,18 +3,17 @@ from django.db.models import QuerySet
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (OpenApiExample, OpenApiResponse,
                                    extend_schema, extend_schema_view)
-from rest_framework import mixins, permissions, serializers, status
-from rest_framework.generics import get_object_or_404
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
-
 from reservations.models import Reservation, ReservationStatus
 from reservations.serializers import (ConfirmedReservationDetailSerializer,
                                       ConfirmedReservationListSerializer,
                                       CreateReservationSerializer,
                                       ReservationSerializer)
 from reservations.services import cancel_reservation, create_reservation
+from rest_framework import mixins, permissions, serializers, status
+from rest_framework.generics import get_object_or_404
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 from showings.models import Showing
 
 
@@ -186,7 +185,7 @@ class ReservationViewSet(
         )
 
         if self.action in ("list", "retrieve"):
-            qs: QuerySet[Reservation] = qs.filter(status=ReservationStatus.CONFIRMED).order_by("-created_at")
+            qs: QuerySet[Reservation] = qs.filter(status__in=[ReservationStatus.CONFIRMED, ReservationStatus.PENDING]).order_by("-created_at")
 
         if self.action == "retrieve":
             qs: QuerySet[Reservation] = qs.prefetch_related("tickets__seat")

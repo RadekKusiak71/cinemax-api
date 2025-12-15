@@ -44,7 +44,7 @@ def test_create_reservation_creates_pending_reservation_and_tickets(
     assert all(t.price == showing.ticket_price for t in tickets)
 
 
-def test_create_reservation_raises_if_existing_pending_reservation(
+def test_create_reservation_raises_if_existing_more_than_3_pending_reservation(
     user_factory,
     showing_factory,
     reservation_factory,
@@ -52,6 +52,8 @@ def test_create_reservation_raises_if_existing_pending_reservation(
     user = user_factory()
     showing = showing_factory()
 
+    reservation_factory(user=user, showing=showing, status=ReservationStatus.PENDING)
+    reservation_factory(user=user, showing=showing, status=ReservationStatus.PENDING)
     reservation_factory(user=user, showing=showing, status=ReservationStatus.PENDING)
 
     with pytest.raises(exc.ExistingPendingReservationException):

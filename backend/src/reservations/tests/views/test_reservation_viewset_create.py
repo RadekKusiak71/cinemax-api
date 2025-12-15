@@ -83,7 +83,7 @@ def test_create_creates_reservation_and_returns_201(
     assert all(t.price == showing.ticket_price for t in tickets)
 
 
-def test_create_returns_400_when_user_already_has_pending_for_showing(
+def test_create_returns_400_when_user_already_has_more_than_3_pending_for_showing(
     api_client,
     user_factory,
     reservation_factory,
@@ -93,6 +93,8 @@ def test_create_returns_400_when_user_already_has_pending_for_showing(
     api_client.force_authenticate(user=user)
 
     showing = showing_factory()
+    reservation_factory(user=user, showing=showing, status=ReservationStatus.PENDING)
+    reservation_factory(user=user, showing=showing, status=ReservationStatus.PENDING)
     reservation_factory(user=user, showing=showing, status=ReservationStatus.PENDING)
 
     res = api_client.post(
